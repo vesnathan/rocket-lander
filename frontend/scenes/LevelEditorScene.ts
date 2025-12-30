@@ -22,6 +22,7 @@ import type {
   EditorMode,
   EditorHazard,
   EditorEnemy,
+  EditorState,
 } from '../editor/types';
 
 /**
@@ -116,7 +117,7 @@ export class LevelEditorScene extends Phaser.Scene {
     super({ key: 'LevelEditorScene' });
   }
 
-  init(data?: { level?: Level; levelNumber?: number; editorState?: any }): void {
+  init(data?: { level?: Level; levelNumber?: number; editorState?: EditorState }): void {
     // Initialize state - prefer editorState if returning from test mode
     if (data?.editorState) {
       this.stateManager = new EditorStateManager(data.editorState);
@@ -948,7 +949,7 @@ export class LevelEditorScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ESC', () => this.deselectAll());
 
     // Mouse wheel scrolling for tall levels
-    this.input.on('wheel', (pointer: Phaser.Input.Pointer, _gameObjects: any[], _deltaX: number, deltaY: number) => {
+    this.input.on('wheel', (pointer: Phaser.Input.Pointer, _gameObjects: Phaser.GameObjects.GameObject[], _deltaX: number, deltaY: number) => {
       if (this.isInCanvas(pointer.x, pointer.y)) {
         this.scrollEditor(deltaY);
       }
@@ -1936,9 +1937,9 @@ export class LevelEditorScene extends Phaser.Scene {
     this.drawGrid();
 
     // Update button text
-    this.children.each((child: any) => {
+    this.children.each((child: Phaser.GameObjects.GameObject) => {
       if (child.getData && child.getData('gridText')) {
-        child.setText(this.snapToGrid ? 'GRID:ON' : 'GRID:OFF');
+        (child as Phaser.GameObjects.Text).setText(this.snapToGrid ? 'GRID:ON' : 'GRID:OFF');
       }
     });
   }

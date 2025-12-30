@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type Phaser from 'phaser';
 import type { Level } from '@shared/types/Level';
+import type { EditorState } from '../editor/types';
 
 /**
  * Props for the EditorCanvas component.
@@ -30,7 +31,7 @@ interface EditorCanvasProps {
 /**
  * Check for saved editor state in sessionStorage (returning from test mode).
  */
-function getSavedEditorState(): any | null {
+function getSavedEditorState(): EditorState | null {
   if (typeof window === 'undefined') return null;
 
   const data = sessionStorage.getItem('editorState');

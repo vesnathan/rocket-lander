@@ -12,6 +12,7 @@ import { InputManager, getInputManager } from '../input/InputManager';
 import { createDefaultInputState, type InputState } from '../input/InputState';
 import type { Level } from '@shared/types/Level';
 import { getLevel, TOTAL_LEVELS } from '../levels/levels';
+import type { EditorState } from '../editor/types';
 import {
   renderTerrain,
   renderLandingPad,
@@ -169,7 +170,7 @@ export class GameScene extends BaseScene {
   /** Test mode: flag indicating we're in test mode */
   private isTestMode: boolean = false;
   /** Test mode: editor state to restore when returning to editor */
-  private editorState: any = null;
+  private editorState: EditorState | null = null;
 
   /** Game over overlay container */
   private gameOverContainer: Phaser.GameObjects.Container | null = null;
@@ -203,7 +204,7 @@ export class GameScene extends BaseScene {
   /**
    * Initialize scene with data.
    */
-  init(data?: { testLevel?: Level; startLevel?: number; isTestMode?: boolean; editorState?: any }): void {
+  init(data?: { testLevel?: Level; startLevel?: number; isTestMode?: boolean; editorState?: EditorState }): void {
     // Reset loading flag to ensure clean start
     this.isLoadingLevel = false;
 
@@ -265,7 +266,7 @@ export class GameScene extends BaseScene {
   /**
    * Check for test level in sessionStorage (set by editor's TEST button).
    */
-  private getTestLevelFromStorage(): { level: Level; editorState?: any } | null {
+  private getTestLevelFromStorage(): { level: Level; editorState?: EditorState } | null {
     if (typeof window === 'undefined') return null;
 
     const data = sessionStorage.getItem('testLevel');

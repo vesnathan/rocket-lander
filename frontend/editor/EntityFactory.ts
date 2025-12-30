@@ -13,6 +13,7 @@ import type {
   EditorHazard,
   EditorEnemy,
   EditorVisualEntity,
+  EditorSpawnPoint,
 } from './types';
 import {
   renderTerrain,
@@ -243,7 +244,7 @@ export class EntityFactory {
   /**
    * Create spawn point visual using shared renderer.
    */
-  private createSpawnPointVisual(entity: any): Phaser.GameObjects.Container {
+  private createSpawnPointVisual(entity: EditorSpawnPoint): Phaser.GameObjects.Container {
     const container = this.scene.add.container(0, 0);
 
     // Get bubble color from entity (default to green)
