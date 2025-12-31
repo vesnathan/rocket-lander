@@ -1,12 +1,20 @@
 {
-  "name": "rocket-lander",
-  "version": "0.1.0",
+  "name": "puzzle-book",
+  "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "shared",
+    "shared-infra",
+    "apps/*",
+    "apps/*/frontend",
+    "apps/*/deploy"
+  ],
   "scripts": {
-    "dev": "yarn --cwd frontend dev",
-    "build": "yarn --cwd frontend build",
-    "start": "yarn --cwd frontend start",
-    "lint": "yarn --cwd frontend lint",
-    "typecheck": "yarn --cwd frontend typecheck"
+    "dev:lander": "yarn --cwd apps/lander/frontend dev",
+    "build:lander": "yarn --cwd apps/lander/frontend build",
+    "deploy:lander:dev": "yarn --cwd apps/lander/deploy deploy:dev",
+    "deploy:lander:prod": "yarn --cwd apps/lander/deploy deploy:prod",
+    "deploy:shared-infra:dev": "yarn --cwd shared-infra deploy:dev",
+    "deploy:shared-infra:prod": "yarn --cwd shared-infra deploy:prod"
   }
 }

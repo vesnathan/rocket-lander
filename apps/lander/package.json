@@ -1,0 +1,15 @@
+{
+  "name": "@puzzle-book/lander",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "deploy"
+  ],
+  "scripts": {
+    "dev": "yarn --cwd frontend dev",
+    "build": "yarn --cwd frontend build",
+    "deploy:dev": "yarn --cwd deploy deploy:dev",
+    "deploy:prod": "yarn --cwd deploy deploy:prod"
+  }
+}

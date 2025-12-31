@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Rocket Lander - Static Game Hosting Infrastructure"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application short name (used in resource names)
+    Default: rocket-lander
+  TemplateBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
+  DomainName:
+    Type: String
+    Description: Custom domain name for CloudFront (e.g., rocketlander.com)
+    Default: ""
+  HostedZoneId:
+    Type: String
+    Description: Route53 Hosted Zone ID for domain validation
+    Default: ""
+  CertificateArn:
+    Type: String
+    Description: ACM Certificate ARN in us-east-1 for custom domain
+    Default: ""
+  DeployUserArn:
+    Type: String
+    Description: ARN of the deploy user that can assume the seed role
+    Default: ""
+
+Conditions:
+  HasDeployUser: !Not [!Equals [!Ref DeployUserArn, ""]]
+  IsProd: !Equals [!Ref Stage, "prod"]
+  HasCustomDomain: !And
+    - !Condition IsProd
+    - !Not [!Equals [!Ref DomainName, ""]]
+
+Resources:
+  # S3 Bucket for frontend
+  S3Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: !Ref AppName
+
+  # CloudFront Distribution
+  CloudFrontStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: !Ref AppName
+        FrontendBucketName: !GetAtt S3Stack.Outputs.FrontendBucketName
+        FrontendBucketArn: !GetAtt S3Stack.Outputs.FrontendBucketArn
+        FrontendBucketRegionalDomainName: !GetAtt S3Stack.Outputs.FrontendBucketRegionalDomainName
+        DomainName: !Ref DomainName
+        HostedZoneId: !Ref HostedZoneId
+        CertificateArn: !Ref CertificateArn
+
+  # Seed role for deployment
+  SeedRole:
+    Type: AWS::IAM::Role
+    Condition: HasDeployUser
+    DependsOn: [S3Stack, CloudFrontStack]
+    Properties:
+      RoleName: !Sub "${AppName}-seed-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref DeployUserArn
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${AppName}-seed-${Stage}"
+      Policies:
+        - PolicyName: seed-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: FrontendBucketAccess
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt S3Stack.Outputs.FrontendBucketArn
+                  - !Sub "${S3Stack.Outputs.FrontendBucketArn}/*"
+              - Sid: CloudFrontInvalidation
+                Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource:
+                  - !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontStack.Outputs.CloudFrontDistributionId}"
+      Tags:
+        - Key: App
+          Value: !Ref AppName
+        - Key: Project
+          Value: rocket-lander
+        - Key: Stage
+          Value: !Ref Stage
+
+Outputs:
+  WebsiteBucket:
+    Description: S3 bucket for frontend
+    Value: !GetAtt S3Stack.Outputs.FrontendBucketName
+    Export:
+      Name: !Sub "${AppName}-${Stage}-website-bucket"
+
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId
+    Export:
+      Name: !Sub "${AppName}-${Stage}-cloudfront-id"
+
+  CloudFrontDomainName:
+    Description: CloudFront Distribution Domain Name
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName
+    Export:
+      Name: !Sub "${AppName}-${Stage}-cloudfront-domain"
+
+  SeedRoleArn:
+    Description: ARN of the seed role for frontend deployment
+    Condition: HasDeployUser
+    Value: !GetAtt SeedRole.Arn
+    Export:
+      Name: !Sub "${AppName}-${Stage}-seed-role-arn"

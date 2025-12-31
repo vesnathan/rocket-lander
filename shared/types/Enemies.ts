@@ -3,8 +3,15 @@
  * Defines enemy configurations that can be placed in levels.
  */
 
-import type { Vector2 } from '../core/math';
 import type { PositionedObject } from './Obstacles';
+
+/**
+ * 2D Vector representation.
+ */
+export interface Vector2 {
+  x: number;
+  y: number;
+}
 
 /**
  * Patrol waypoint for enemy movement.

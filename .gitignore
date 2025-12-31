@@ -31,3 +31,10 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Deploy cache
+.cache/
+
+# Lock files (use root yarn.lock only)
+apps/**/yarn.lock
+shared-infra/yarn.lock

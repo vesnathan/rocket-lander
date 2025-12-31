@@ -3,8 +3,6 @@
  * Defines all static and dynamic obstacles in levels.
  */
 
-import type { Vector2 } from '../core/math';
-
 /**
  * Base interface for all level objects with position.
  */

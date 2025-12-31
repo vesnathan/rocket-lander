@@ -8,7 +8,6 @@ export type {
   TerrainBlock,
   LandingPad,
   IceLayer,
-  MovingColumnDef,
   LaserFieldDef,
   HazardDef,
   FuelPickup,

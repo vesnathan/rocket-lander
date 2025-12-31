@@ -3,7 +3,6 @@
  * Defines the complete schema for level configuration.
  */
 
-import type { Vector2 } from '../core/math';
 import type {
   TerrainBlock,
   LandingPad,

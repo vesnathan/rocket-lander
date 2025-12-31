@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Rocket Lander - S3 Buckets"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+  AppName:
+    Type: String
+    Description: Application Name
+    Default: rocket-lander
+
+Resources:
+  # Frontend static website bucket
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AppName}-frontend-${Stage}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - HEAD
+            AllowedOrigins:
+              - "*"
+            MaxAge: 3600
+      Tags:
+        - Key: Project
+          Value: rocket-lander
+        - Key: Stage
+          Value: !Ref Stage
+
+Outputs:
+  FrontendBucketName:
+    Description: Frontend S3 Bucket Name
+    Value: !Ref FrontendBucket
+
+  FrontendBucketArn:
+    Description: Frontend S3 Bucket ARN
+    Value: !GetAtt FrontendBucket.Arn
+
+  FrontendBucketRegionalDomainName:
+    Description: Frontend S3 Bucket Regional Domain Name
+    Value: !GetAtt FrontendBucket.RegionalDomainName

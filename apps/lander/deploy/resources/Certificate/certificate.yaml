@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Rocket Lander - ACM Certificate (must be deployed in us-east-1)"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+  AppName:
+    Type: String
+    Description: Application Name
+    Default: rocket-lander
+  DomainName:
+    Type: String
+    Description: Full domain name for the certificate (e.g., lander.puzzle-book.games)
+  HostedZoneId:
+    Type: String
+    Description: Route53 Hosted Zone ID for DNS validation
+
+Resources:
+  # ACM Certificate with DNS validation
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+      Tags:
+        - Key: Project
+          Value: rocket-lander
+        - Key: Stage
+          Value: !Ref Stage
+
+Outputs:
+  MainCertificateArn:
+    Description: ACM Certificate ARN
+    Value: !Ref Certificate
